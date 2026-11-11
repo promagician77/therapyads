@@ -1,0 +1,497 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Inquiry Tracking Bench</title>
+<meta name="description" content="Why real inquiries never record as qualified leads in Google Ads, and the fix: click ID capture, import checks, conversion plan.">
+<style>:root{color-scheme:light dark}*,*::before,*::after{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;font:15px/1.6 system-ui,-apple-system,Segoe UI,sans-serif}img,svg,video{max-width:100%;height:auto}button,input,select,textarea{font:inherit;color:inherit}table{border-collapse:collapse}[hidden]{display:none!important}</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Figtree:wght@400;500;600;700;800&display=swap">
+<style>
+:root{
+  --bg:#f3f4f1; --panel:#ffffff; --panel2:#f7f8f5; --ink:#1a1e1c; --mut:#59605c; --faint:#878e89;
+  --line:#dadfd9; --line2:#e8ebe6;
+  --accent:#2f6b57; --accentbg:#e3efe9; --ok:#27694a; --okbg:#e2f0e7; --bad:#a3352c; --badbg:#f7e3e0; --warn:#8b5d0e; --warnbg:#f6ecd6;
+  --sans:"Figtree",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"DM Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#101312; --panel:#171b19; --panel2:#1c211f; --ink:#e5e9e6; --mut:#a1a9a4; --faint:#717973;
+  --line:#2a302d; --line2:#222825;
+  --accent:#78c4a6; --accentbg:#16271f; --ok:#6cc597; --okbg:#13251b; --bad:#ec7b70; --badbg:#2b1715; --warn:#e3a957; --warnbg:#2a2113; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#101312; --panel:#171b19; --panel2:#1c211f; --ink:#e5e9e6; --mut:#a1a9a4; --faint:#717973;
+  --line:#2a302d; --line2:#222825;
+  --accent:#78c4a6; --accentbg:#16271f; --ok:#6cc597; --okbg:#13251b; --bad:#ec7b70; --badbg:#2b1715; --warn:#e3a957; --warnbg:#2a2113; color-scheme:dark }
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font:15.5px/1.55 var(--sans);
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));padding-block:22px 48px}
+.wrap{max-width:1140px;margin:0 auto}
+.kicker{font:500 12px var(--mono);letter-spacing:.04em;color:var(--accent);text-transform:uppercase}
+h1{font:800 29px/1.15 var(--sans);margin:6px 0;letter-spacing:-.015em;text-wrap:balance}
+h2{font:700 19px/1.3 var(--sans);margin:0 0 8px;text-wrap:balance}
+h3{font:700 12px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin:0 0 8px}
+p{margin:0 0 10px;max-width:74ch}
+.lede{color:var(--mut);max-width:84ch} .note{font-size:13.5px;color:var(--mut)} .mono{font-family:var(--mono)}
+nav{display:flex;flex-wrap:wrap;gap:6px;border-bottom:1px solid var(--line);margin:16px 0 18px;padding-bottom:10px}
+nav a{font:700 14.5px var(--sans);color:var(--mut);text-decoration:none;padding:7px 13px;border-radius:8px;border:1px solid transparent}
+nav a[aria-current="page"]{color:var(--ink);background:var(--panel);border-color:var(--line)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;min-width:0}
+.grid{display:grid;gap:12px}
+.g2{grid-template-columns:minmax(0,1fr) minmax(0,1fr)} .g3{grid-template-columns:repeat(3,minmax(0,1fr))} .g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.side{grid-template-columns:minmax(0,330px) minmax(0,1fr)}
+@media (max-width:900px){.side,.g2,.g3{grid-template-columns:minmax(0,1fr)}.g4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.stat{padding:12px 14px;border:1px solid var(--line2);border-radius:10px;background:var(--panel2);min-width:0}
+.stat .k{font:600 12.5px var(--sans);color:var(--mut)} .stat .v{font:800 24px/1.15 var(--sans)}
+.stat.bad{background:var(--badbg);border-color:var(--bad)} .stat.bad .v{color:var(--bad)}
+.stat.ok{background:var(--okbg);border-color:var(--ok)} .stat.ok .v{color:var(--ok)}
+label.f{display:block;font:600 12.5px var(--sans);color:var(--mut);margin:8px 0 3px}
+input[type=number],input[type=text],input[type=date],textarea{width:100%;font:14.5px var(--sans);padding:7px 9px;border:1px solid var(--line);border-radius:7px;background:var(--panel2);color:var(--ink)}
+textarea{font:12.5px/1.45 var(--mono);min-height:150px;resize:vertical}
+.btn,.seg button{font:700 13.5px var(--sans);padding:7px 12px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--ink);cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--panel)}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.toggle{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);cursor:pointer;margin-bottom:8px}
+.toggle input{margin-top:4px;accent-color:var(--accent)}
+.toggle b{display:block}
+.path{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-top:6px}
+@media (max-width:760px){.path{grid-template-columns:minmax(0,1fr)}}
+.step{border:1.5px solid var(--line);border-radius:10px;padding:10px;background:var(--panel2);min-width:0}
+.step.ok{border-color:var(--ok);background:var(--okbg)} .step.bad{border-color:var(--bad);background:var(--badbg)}
+.step b{display:block;font-size:14px} .step span{font-size:13px;color:var(--mut)}
+.verdict{border-radius:10px;padding:14px 16px;margin-top:12px;border:1.5px solid var(--line);font-size:15.5px}
+.verdict.ok{background:var(--okbg);border-color:var(--ok)} .verdict.bad{background:var(--badbg);border-color:var(--bad)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line2);vertical-align:top}
+th{font:700 11.5px var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--faint)}
+td.n,th.n{text-align:right;font-family:var(--mono);white-space:nowrap}
+.tbl{overflow-x:auto}
+.pill{display:inline-block;font:700 11.5px var(--sans);padding:1px 8px;border-radius:999px;border:1px solid var(--line);white-space:nowrap}
+.pill.bad{color:var(--bad);border-color:var(--bad);background:var(--badbg)} .pill.ok{color:var(--ok);border-color:var(--ok);background:var(--okbg)}
+.sample{display:inline-block;font:800 11px var(--sans);letter-spacing:.08em;color:var(--warn);border:1px solid var(--warn);border-radius:4px;padding:2px 6px;background:var(--warnbg)}
+pre{font:12.5px/1.5 var(--mono);background:var(--panel2);border:1px solid var(--line2);border-radius:8px;padding:12px;overflow-x:auto;margin:8px 0;white-space:pre-wrap;overflow-wrap:anywhere}
+ul.probs{margin:4px 0 0;padding-left:18px;font-size:13.5px}
+footer{margin-top:26px;font-size:13px;color:var(--faint);max-width:95ch}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="kicker">Google Ads · GTM · GA4 · WordPress · Google Form · offline import</div>
+  <h1>Inquiry Tracking Bench</h1>
+  <p class="lede">Why a real inquiry from a Google ad never shows up as a qualified lead, and the fix, run here on the actual scripts. Nothing in this page touches your accounts; the sample rows are invented.</p>
+</header>
+
+<nav id="tabs">
+  <a href="#zero" data-tab="zero">Why zero</a>
+  <a href="#weeks" data-tab="weeks">Your two weeks</a>
+  <a href="#capture" data-tab="capture">Click ID capture</a>
+  <a href="#import" data-tab="import">Import checker</a>
+  <a href="#rebuild" data-tab="rebuild">Conversion plan</a>
+  <a href="#plan" data-tab="plan">Hours</a>
+</nav>
+
+<!-- ============================================ zero -->
+<section id="tab-zero">
+  <div class="grid side">
+    <div class="card">
+      <h2>Switch the fixes on</h2>
+      <p class="note">Starts as the post describes it. Google matches an imported inquiry by the click ID, or by "the same data collected on your website (for example, lead form)".</p>
+      <label class="toggle"><input type="checkbox" id="z-gclid"><span><b>Click ID reaches the sheet</b><span class="note">03 captures it; the form carries it</span></span></label>
+      <label class="toggle"><input type="checkbox" id="z-email"><span><b>Tag collects email and phone at submission</b><span class="note">needs the form inside WordPress</span></span></label>
+      <label class="toggle"><input type="checkbox" id="z-sheet"><span><b>Import rows pass Google's rules</b><span class="note">exact name, time zone, hashed fields (04 checks)</span></span></label>
+    </div>
+    <div class="card">
+      <h3>One inquiry from an ad</h3>
+      <div class="path" id="z-path"></div>
+      <div id="z-verdict"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ weeks -->
+<section id="tab-weeks" hidden>
+  <div class="grid side">
+    <div class="card">
+      <h2>The post's numbers</h2>
+      <label class="f">Monthly budget (USD)</label><input type="number" id="w-b">
+      <div class="grid g2" style="gap:0 10px">
+        <div><label class="f">Week A leads</label><input type="number" id="w-al"></div><div><label class="f">Week A cost per lead</label><input type="number" id="w-ac"></div>
+        <div><label class="f">Week B leads</label><input type="number" id="w-bl"></div><div><label class="f">Week B cost per lead</label><input type="number" id="w-bc"></div>
+      </div>
+    </div>
+    <div class="grid" style="gap:12px">
+      <div class="card"><div class="grid g3" id="w-stats"></div></div>
+      <div class="card"><p id="w-read" style="margin:0"></p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ capture -->
+<section id="tab-capture" hidden>
+  <div class="grid side">
+    <div class="card">
+      <h2>What 03_gclid_capture.js does with a landing URL</h2>
+      <label class="f">Landing URL from an ad click</label>
+      <input type="text" id="c-url" value="https://example-practice.com/couples-therapy/?utm_source=google&gclid=EAIaIQobChMI8x7Lq1u-YQaVBkEAAYASAAEgK00fD_BwE">
+      <label class="f">Google Form entry id (from its pre-filled "Get link")</label>
+      <input type="text" id="c-entry" value="entry.1234567890">
+      <label class="f">The Google Form embed address</label>
+      <input type="text" id="c-src" value="https://docs.google.com/forms/d/e/1FAIpQLSexample/viewform?embedded=true">
+      <p class="note" style="margin-top:8px">This page runs the real script file in export mode: the functions below are the ones GTM will run.</p>
+    </div>
+    <div class="card">
+      <h3>Click IDs read</h3><pre id="c-ids"></pre>
+      <h3>First-party cookie written (90 days)</h3><pre id="c-cookie"></pre>
+      <h3>Google Form address after pre-fill</h3><pre id="c-form"></pre>
+      <p class="note">A WordPress form gets the same IDs in hidden fields named gclid, gbraid, wbraid. The Google Form route is the stopgap that works this week; its click ID question is visible to the visitor, labelled "Reference, leave as is".</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ import -->
+<section id="tab-import" hidden>
+  <div class="card">
+    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between">
+      <h2 style="margin:0">Check an import sheet before Google does</h2><span class="sample" id="i-badge">INVENTED SAMPLE</span>
+    </div>
+    <p class="note" style="margin-top:6px">Paste the import tab as CSV (it may start with a Parameters:TimeZone row). Same rules as 04_import_checker.py; nothing leaves this page.</p>
+    <textarea id="i-csv" spellcheck="false"></textarea>
+    <div class="grid g3" style="gap:10px;margin-top:8px">
+      <div><label class="f">Conversion action name in Google Ads</label><input type="text" id="i-name" value="Qualified lead"></div>
+      <div><label class="f">Check as of</label><input type="date" id="i-today" value="2026-11-10"></div>
+      <div class="seg" style="align-items:flex-end"><button class="btn primary" id="i-run" type="button">Check</button><button class="btn" id="i-broken" type="button">Today's sheet</button><button class="btn" id="i-fixed" type="button">After the fix</button></div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:12px">
+    <div class="grid g4" id="i-stats"></div>
+    <div class="tbl" style="margin-top:10px"><table id="i-rows"><thead><tr><th>Row</th><th>Click ID</th><th>User data</th><th>Result</th></tr></thead><tbody></tbody></table></div>
+  </div>
+</section>
+
+<!-- ============================================ rebuild -->
+<section id="tab-rebuild" hidden>
+  <div class="card">
+    <h2>Conversion actions after the fix</h2>
+    <div class="tbl"><table>
+      <thead><tr><th>Action</th><th>Source</th><th>Bidding</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td><b>Qualified lead</b></td><td>offline import</td><td><span class="pill ok">primary</span></td><td>a real inquiry the practice confirmed</td></tr>
+        <tr><td>Inquiry submitted</td><td>website tag, once the form is in WordPress</td><td><span class="pill">primary, then secondary</span></td><td>same-day signal while imports lag</td></tr>
+        <tr><td>Phone click</td><td>website tag</td><td><span class="pill">secondary</span></td><td>reported, never steers bids</td></tr>
+        <tr><td>Booking page view</td><td>website tag</td><td><span class="pill">secondary</span></td><td>upper funnel, reported only</td></tr>
+        <tr><td>Page-view "lead" action</td><td>website tag</td><td><span class="pill bad">removed from bidding</span></td><td>counts visits, the likely overcount</td></tr>
+      </tbody></table></div>
+    <p class="note" style="margin-top:10px">No remarketing lists: Google's policy lists "Counseling services for mental health issues" as a sensitive category where advertiser-curated audiences can't be used. Competitor names may be keywords, never ad text (Google's trademark policy). Only the click ID and a hashed email or phone ever leave the intake sheet.</p>
+  </div>
+</section>
+
+<!-- ============================================ plan -->
+<section id="tab-plan" hidden>
+  <div class="card">
+    <h2>About four weeks</h2>
+    <div class="tbl"><table id="plan"><thead><tr><th>#</th><th>Phase</th><th class="n">Hours</th></tr></thead><tbody></tbody></table></div>
+    <p class="note" style="margin-top:8px">Tracking verified live by the end of week one: a real ad-driven inquiry visible in Google Ads as a qualified lead.</p>
+  </div>
+</section>
+
+<footer>Sources: Google Ads Help (auto-tagging; offline conversion imports and their FAQ and errors; enhanced conversions for leads; Tag Assistant statuses), Google Ads policies (Health in personalized advertising; Trademarks), Google Docs Editors Help (pre-filled forms). Sample sheets are invented.</footer>
+</div>
+
+<script>var module = {exports: {}};</script>
+<script id="capture">
+/*
+ * Click ID capture for a WordPress site whose inquiry form is a Google Form.
+ *
+ * Paste between <script> tags in a GTM Custom HTML tag, trigger: All Pages.
+ * ES5 only, so GTM accepts it. Test under node: `node 03_gclid_capture.js`.
+ *
+ * Google Ads auto-tagging adds ?gclid=... to the landing URL (Google's example:
+ * "www.example.com/?gclid=123xyz"); iOS traffic can carry gbraid or wbraid
+ * instead. Google keeps a click for 90 days ("We retain the GCLID for only 90
+ * days"), so the ID is stored for 90 days in a first-party cookie, then:
+ *
+ *  1. any WordPress form with hidden fields named gclid / gbraid / wbraid gets
+ *     them filled (the durable fix, once the inquiry form moves into WordPress)
+ *  2. any embedded Google Form gets the ID added to its iframe address as a
+ *     pre-filled answer, using the entry id from the form's "Get link"
+ *     pre-fill URL (the fix that works this week, before any form is rebuilt)
+ *
+ * A Google Form runs on docs.google.com, so a script on the WordPress page
+ * cannot read or submit it; adding the ID to the form's own address is the
+ * one place this page can still hand it over.
+ */
+(function (root) {
+  var CONFIG = {
+    cookie: '_inq_click',
+    maxAgeDays: 90,
+    params: ['gclid', 'gbraid', 'wbraid'],
+    googleFormEntry: { gclid: 'entry.0000000000' }   // replace with the id from the pre-filled link
+  };
+
+  function readClickIds(url) {
+    var out = {}, q = (url.split('?')[1] || '').split('#')[0];
+    q.split('&').forEach(function (pair) {
+      var kv = pair.split('='), k = decodeURIComponent(kv[0] || '');
+      if (CONFIG.params.indexOf(k) >= 0 && kv[1]) out[k] = decodeURIComponent(kv[1].replace(/\+/g, ' '));
+    });
+    return out;
+  }
+
+  function cookieString(ids, now) {
+    var payload = encodeURIComponent(JSON.stringify({ ids: ids, t: now }));
+    return CONFIG.cookie + '=' + payload + '; Max-Age=' + CONFIG.maxAgeDays * 86400 + '; Path=/; SameSite=Lax; Secure';
+  }
+
+  function readStored(cookies, now) {
+    var m = (cookies || '').match(new RegExp('(?:^|; )' + CONFIG.cookie + '=([^;]*)'));
+    if (!m) return {};
+    try {
+      var v = JSON.parse(decodeURIComponent(m[1]));
+      return now - v.t <= CONFIG.maxAgeDays * 86400000 ? v.ids : {};
+    } catch (e) { return {}; }
+  }
+
+  function fillHidden(doc, ids) {
+    var n = 0;
+    CONFIG.params.forEach(function (p) {
+      if (!ids[p]) return;
+      var els = doc.querySelectorAll('input[name="' + p + '"]');
+      for (var i = 0; i < els.length; i++) { els[i].value = ids[p]; n++; }
+    });
+    return n;
+  }
+
+  function prefillGoogleFormSrc(src, ids) {
+    if (!/^https:\/\/docs\.google\.com\/forms\//.test(src)) return src;
+    var add = [];
+    CONFIG.params.forEach(function (p) {
+      var entry = CONFIG.googleFormEntry[p];
+      if (entry && ids[p] && src.indexOf(entry + '=') < 0) add.push(entry + '=' + encodeURIComponent(ids[p]));
+    });
+    if (!add.length) return src;
+    return src + (src.indexOf('?') >= 0 ? '&' : '?') + add.join('&');
+  }
+
+  function prefillGoogleForms(doc, ids) {
+    var frames = doc.querySelectorAll('iframe'), n = 0;
+    for (var i = 0; i < frames.length; i++) {
+      var s = frames[i].getAttribute('src') || '', t = prefillGoogleFormSrc(s, ids);
+      if (t !== s) { frames[i].setAttribute('src', t); n++; }
+    }
+    return n;
+  }
+
+  function run(win, doc, now) {
+    now = now || new Date().getTime();
+    var fromUrl = readClickIds(win.location.href), ids = fromUrl;
+    if (Object.keys(fromUrl).length) doc.cookie = cookieString(fromUrl, now);
+    else ids = readStored(doc.cookie, now);
+    var result = { ids: ids, fromUrl: Object.keys(fromUrl).length > 0, hidden: fillHidden(doc, ids), forms: prefillGoogleForms(doc, ids) };
+    if (win.dataLayer) win.dataLayer.push({ event: 'click_ids_ready', click_ids_present: Object.keys(ids).length > 0 });
+    return result;
+  }
+
+  var api = { CONFIG: CONFIG, readClickIds: readClickIds, cookieString: cookieString, readStored: readStored,
+              fillHidden: fillHidden, prefillGoogleFormSrc: prefillGoogleFormSrc, run: run };
+  if (typeof module !== 'undefined' && module.exports) module.exports = api;
+  else run(root, root.document);
+
+  /* ---------------------------------------------------------- node self-test */
+  if (typeof require !== 'undefined' && typeof module !== 'undefined' && require.main === module) {
+    var n = 0, fail = function (m) { console.log('FAIL ' + m); process.exit(1); }, check = function (c, m) { n++; if (!c) fail(m); };
+    var ids = readClickIds('https://example.org/couples/?utm_source=google&gclid=EAIaIQobChMI_abc-123&x=1#top');
+    check(ids.gclid === 'EAIaIQobChMI_abc-123' && Object.keys(ids).length === 1, 'gclid read from the landing URL');
+    check(readClickIds('https://example.org/?wbraid=Cj0KQ&gbraid=0AAAA').wbraid === 'Cj0KQ', 'iOS wbraid / gbraid read');
+    check(Object.keys(readClickIds('https://example.org/contact')).length === 0, 'no click id, nothing stored');
+    var now = Date.UTC(2026, 10, 10), c = cookieString(ids, now);
+    check(c.indexOf('Max-Age=7776000') > 0 && c.indexOf('SameSite=Lax') > 0, '90-day first-party cookie');
+    var jar = c.split(';')[0];
+    check(readStored('other=1; ' + jar, now + 86400000 * 30).gclid === ids.gclid, 'read back after 30 days');
+    check(Object.keys(readStored(jar, now + 86400000 * 91)).length === 0, 'expired after 90 days');
+    check(Object.keys(readStored('_inq_click=garbage', now)).length === 0, 'corrupt cookie ignored');
+    var src = 'https://docs.google.com/forms/d/e/1FAIpQLSexample/viewform?embedded=true';
+    CONFIG.googleFormEntry.gclid = 'entry.1234567890';
+    var t = prefillGoogleFormSrc(src, ids);
+    check(t === src + '&entry.1234567890=EAIaIQobChMI_abc-123', 'Google Form src gets the pre-filled entry');
+    check(prefillGoogleFormSrc(t, ids) === t, 'not added twice');
+    check(prefillGoogleFormSrc('https://www.youtube.com/embed/x', ids) === 'https://www.youtube.com/embed/x', 'other iframes untouched');
+    function fakeDoc(cookie) {
+      var inputs = [{ value: '' }], frames = [{ s: src, getAttribute: function () { return this.s; }, setAttribute: function (k, v) { this.s = v; } }];
+      return { cookie: cookie || '', inputs: inputs, frames: frames,
+        querySelectorAll: function (sel) { return sel === 'iframe' ? frames : (sel === 'input[name="gclid"]' ? inputs : []); } };
+    }
+    var d1 = fakeDoc(), w1 = { location: { href: 'https://example.org/?gclid=ABC123xyz' }, dataLayer: [] };
+    var r1 = run(w1, d1, now);
+    check(r1.fromUrl && r1.hidden === 1 && d1.inputs[0].value === 'ABC123xyz' && r1.forms === 1, 'landing page: hidden field and Google Form filled');
+    check(w1.dataLayer[0].event === 'click_ids_ready' && w1.dataLayer[0].click_ids_present === true, 'dataLayer event for GTM');
+    var d2 = fakeDoc(d1.cookie.split(';')[0]), w2 = { location: { href: 'https://example.org/contact/' } };
+    var r2 = run(w2, d2, now + 3600000);
+    check(!r2.fromUrl && d2.inputs[0].value === 'ABC123xyz' && d2.frames[0].s.indexOf('ABC123xyz') > 0, 'second page: id comes from the cookie');
+    console.log('self-test: ' + n + '/' + n + ' passed');
+  }
+})(typeof window !== 'undefined' ? window : this);
+
+</script>
+<script id="ports">
+var CAP = module.exports;
+/* ---- 08_weekly_math ---- */
+function poissonCdf(k, lam){ var s = 0; for (var i = 0; i <= k; i++) s += Math.exp(i * Math.log(lam) - lam - lgamma(i + 1)); return s; }
+function lgamma(n){ var s = 0; for (var i = 2; i < n; i++) s += Math.log(i); return s; }   /* integer n: log((n-1)!) */
+function weeks(p){
+  var avg = p.monthly_budget / (52 / 12), a = p.week_a, b = p.week_b, sa = a.leads * a.cpl, sb = b.leads * b.cpl;
+  return {avg_week_spend: avg, week_a_spend: sa, week_b_spend: sb, week_a_vs_avg: sa / avg, week_b_vs_avg: sb / avg,
+    spend_change: sb / sa - 1, p_seven_or_fewer_if_rate_40: poissonCdf(b.leads, a.leads),
+    leads_per_month_at_a: p.monthly_budget / a.cpl, leads_per_month_at_b: p.monthly_budget / b.cpl};
+}
+/* ---- 04_import_checker ---- */
+var HEX64 = /^[0-9a-f]{64}$/;
+function tzOffsetMinutes(zone, y, mo, d, h, mi, s){
+  var guess = Date.UTC(y, mo - 1, d, h, mi, s);
+  var parts = new Intl.DateTimeFormat('en-US', {timeZone: zone, hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit'}).formatToParts(new Date(guess));
+  var g = {}; parts.forEach(function(p){ g[p.type] = p.value; });
+  var asUtc = Date.UTC(+g.year, +g.month - 1, +g.day, +g.hour, +g.minute, +g.second);
+  return (asUtc - guess) / 60000;
+}
+function parseTime(v, tz){
+  v = (v || '').trim(); if (!v) return [null, 'no conversion time'];
+  var m = v.match(/^(\d{4})-(\d\d)-(\d\d) (\d\d):(\d\d):(\d\d) ?([+-]\d{4})?$/) || null, y, mo, d, h, mi, s, off;
+  if (m) { y = +m[1]; mo = +m[2]; d = +m[3]; h = +m[4]; mi = +m[5]; s = +m[6]; off = m[7]; }
+  else {
+    m = v.match(/^(\d\d)\/(\d\d)\/(\d{4}) (\d\d?):(\d\d):(\d\d)(?: ?([+-]\d{4})| ?(AM|PM))?$/i);
+    if (!m) return [null, 'time ' + JSON.stringify(v) + ' is not in a supported format'];
+    mo = +m[1]; d = +m[2]; y = +m[3]; h = +m[4]; mi = +m[5]; s = +m[6]; off = m[7];
+    if (m[8]) { h = h % 12 + (m[8].toUpperCase() === 'PM' ? 12 : 0); }
+  }
+  var base = Date.UTC(y, mo - 1, d, h, mi, s);
+  if (off) { var sg = off[0] === '-' ? -1 : 1; return [base - sg * (+off.slice(1, 3) * 60 + +off.slice(3)) * 60000, null]; }
+  if (!tz) return [base, 'time has no time zone and the sheet has no Parameters:TimeZone row'];
+  var om = tz.match(/^([+-])(\d\d)(\d\d)$/);
+  if (om) return [base - (om[1] === '-' ? -1 : 1) * (+om[2] * 60 + +om[3]) * 60000, null];
+  try { return [base - tzOffsetMinutes(tz, y, mo, d, h, mi, s) * 60000, null]; } catch (e) { return [base, null]; }
+}
+function splitCsvLine(line){ var out = [], cell = '', q = false;
+  for (var i = 0; i < line.length; i++) { var ch = line[i];
+    if (q) { if (ch === '"' && line[i + 1] === '"') { cell += '"'; i++; } else if (ch === '"') q = false; else cell += ch; }
+    else if (ch === '"') q = true; else if (ch === ',') { out.push(cell); cell = ''; } else cell += ch; }
+  out.push(cell); return out; }
+function readSheet(text){
+  var lines = text.split(/\r?\n/).filter(function(l){ return l.length; }), tz = null;
+  while (lines.length && /^parameters:/i.test(lines[0])) { var mm = lines[0].match(/TimeZone=([^,\s]+)/i); if (mm) tz = mm[1]; lines.shift(); }
+  var head = splitCsvLine(lines.shift() || '');
+  var rows = lines.map(function(l){ var c = splitCsvLine(l), o = {}; head.forEach(function(h, i){ o[h] = c[i] == null ? '' : c[i]; }); return o; });
+  return [tz, rows];
+}
+function col(row){ var names = Array.prototype.slice.call(arguments, 1);
+  for (var i = 0; i < names.length; i++) for (var k in row) if (k && k.trim().toLowerCase() === names[i].toLowerCase()) return (row[k] || '').trim();
+  return ''; }
+function checkRows(text, names, todayMs){
+  var r = readSheet(text), tz = r[0], rows = r[1], seen = {}, out = [];
+  rows.forEach(function(row, idx){
+    var problems = [], gclid = col(row, 'Google Click ID', 'GCLID'), email = col(row, 'Email', 'Hashed Email'),
+      phone = col(row, 'Phone Number', 'Phone', 'Hashed Phone Number'), name = col(row, 'Conversion Name');
+    var pt = parseTime(col(row, 'Conversion Time'), tz), dt = pt[0], pii = !!(email || phone);
+    if (!gclid && !pii) problems.push('nothing to match on: no Google Click ID and no email or phone');
+    if (gclid && (gclid.length < 20 || /\s/.test(gclid))) problems.push('Google Click ID ' + JSON.stringify(gclid.slice(0, 24)) + ' does not look like a real one');
+    [['email', email], ['phone', phone]].forEach(function(lv){ if (lv[1] && !HEX64.test(lv[1])) problems.push(lv[0] + ' is not SHA-256 hashed (scheduled uploads need pre-hashed data)'); });
+    if (!name) problems.push('no conversion name');
+    else if (names.length && names.indexOf(name) < 0) { var near = names.filter(function(x){ return x.toLowerCase() === name.toLowerCase(); });
+      problems.push('conversion name ' + JSON.stringify(name) + ' does not match exactly' + (near.length ? ' (case differs from ' + JSON.stringify(near[0]) + ')' : '')); }
+    if (pt[1]) problems.push(pt[1]);
+    if (dt != null) {
+      var age = (todayMs - dt) / 86400000;
+      if (age < 0) problems.push('conversion time is in the future');
+      else if (gclid && age > 90) problems.push('older than 90 days: Google no longer keeps this click');
+      else if (!gclid && pii && age > 63) problems.push('older than 63 days for a user-data match');
+      var key = (gclid || email || phone) + '|' + name + '|' + dt;
+      if (seen[key]) problems.push('duplicate of an earlier row (same identifier, name and time)');
+      seen[key] = 1;
+    }
+    out.push({row: idx + 1, gclid: !!gclid, user_data: pii, ok: !problems.length, problems: problems});
+  });
+  return {time_zone_row: tz, rows: out.length, uploadable: out.filter(function(x){ return x.ok; }).length,
+    with_click_id: out.filter(function(x){ return x.gclid; }).length, detail: out};
+}
+</script>
+<script>
+var SAMPLES = {"broken": "Google Click ID,Conversion Name,Conversion Time,Email,Conversion Value,Conversion Currency\n,Qualified Lead,11/09/2026 09:00:00,alex.m@gmail.com,,\n,qualified lead,11/06/2026 08:00:00,jordan.k@yahoo.com,,\n,Qualified Lead,11/03/2026 07:00:00,sam.r@outlook.com,,\n,qualified lead,10/31/2026 06:00:00,riley.p@gmail.com,,\n,Qualified Lead,10/28/2026 05:00:00,casey.t@icloud.com,,\n,qualified lead,10/25/2026 04:00:00,morgan.b@gmail.com,,\n", "fixed": "Parameters:TimeZone=America/Los_Angeles\nGoogle Click ID,Conversion Name,Conversion Time,Email,Conversion Value,Conversion Currency\nEAIaIQobChMIAbAbAbAbAbAbx7Lq1u-YQaVBkEAAYASAAEgK00fD_BwE,Qualified lead,2026-11-09 09:00:00,23a5959fb36cbf3a84b4cefc38f89c366e778c577195a2aeb99e9c5bef72b1ad,,\nEAIaIQobChMIAbAbAbAbAbAbx7Lq1u-YQaVBkEAAYASAAEgK01fD_BwE,Qualified lead,2026-11-06 08:00:00,957c2b8977a779b8b442bcf6aab870acacfd1f7357446e4874b2ca5248d6d856,,\nEAIaIQobChMIAbAbAbAbAbAbx7Lq1u-YQaVBkEAAYASAAEgK02fD_BwE,Qualified lead,2026-11-03 07:00:00,caef3a386982be1c20dfd0f609cca846ff08975d60f75a984918c3521fc5a142,,\nEAIaIQobChMIAbAbAbAbAbAbx7Lq1u-YQaVBkEAAYASAAEgK03fD_BwE,Qualified lead,2026-10-31 06:00:00,850381ba76e1e1636c6f4962af8f8714735dd7b844a60149e50a21b30028774b,,\nEAIaIQobChMIAbAbAbAbAbAbx7Lq1u-YQaVBkEAAYASAAEgK04fD_BwE,Qualified lead,2026-10-28 05:00:00,576e268761b194013d98bda75dcea637450f59313ebc386e759f913c5b9f1aad,,\nEAIaIQobChMIAbAbAbAbAbAbx7Lq1u-YQaVBkEAAYASAAEgK05fD_BwE,Qualified lead,2026-10-25 04:00:00,0b0e95ef73c529fe49232f319350de5bc85c13036317b33dc9e2c3a2c0fb0acb,,\n"}, POST = {"monthly_budget": 5000.0, "week_a": {"leads": 40, "cpl": 104.0}, "week_b": {"leads": 7, "cpl": 271.0}}, PLAN = {"rows": [["1", "Audit: account, conversions, bidding, budgets, WordPress, GTM, GA4", "6", "written findings, fixes ranked"], ["2", "Tracking fix: click ID capture, one tag via GTM, sheet bridge, import", "12", "a real ad-driven inquiry shows in Google Ads as a qualified lead"], ["3", "Rebuild: conversion actions, bidding, budget, competitor campaign", "6", "one primary action per stage; changes made and logged"], ["4", "Baseline report after two to three weeks of clean data", "4", "one page: fixed, numbers now, next steps"]], "total": 28};
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+function money(x){ return Math.round(x).toLocaleString('en-US'); }
+
+var TABS = ['zero','weeks','capture','import','rebuild','plan'];
+function show(t){ if (TABS.indexOf(t) < 0) t = 'zero';
+  TABS.forEach(function(k){ $('tab-' + k).hidden = k !== t; });
+  document.querySelectorAll('#tabs a').forEach(function(a){ if (a.dataset.tab === t) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current'); }); }
+window.addEventListener('hashchange', function(){ show(location.hash.slice(1)); });
+document.querySelectorAll('#tabs a').forEach(function(a){ a.addEventListener('click', function(e){ e.preventDefault(); history.replaceState(null,'','#'+a.dataset.tab); show(a.dataset.tab); }); });
+
+/* ---------- why zero ---------- */
+function runZero(){
+  var g = $('z-gclid').checked, e = $('z-email').checked, s = $('z-sheet').checked;
+  var steps = [['Ad click', 'gclid on the landing URL', true],
+    ['WordPress page', g ? 'click ID stored for 90 days' : 'click ID read by nobody', g],
+    ['Form', g ? 'carries the click ID' + (e ? '; tag sees email' : '') : (e ? 'tag sees email, no click ID' : 'a Google Form GTM cannot see'), g || e],
+    ['Intake sheet', g ? 'row has the click ID' : 'row has no click ID', g || e],
+    ['Daily import', s ? 'rows pass Google\'s rules' : 'name, time zone or hashing wrong', s]];
+  $('z-path').innerHTML = steps.map(function(x){ return '<div class="step ' + (x[2] ? 'ok' : 'bad') + '"><b>' + x[0] + '</b><span>' + esc(x[1]) + '</span></div>'; }).join('');
+  var how = !s ? null : (g ? 'by its click ID' : (e ? 'by the hashed email the tag collected on your site' : null));
+  $('z-verdict').innerHTML = how ? '<div class="verdict ok"><b>Recorded as a qualified lead</b>, matched ' + how + '. Google asks for about 6 hours between the click and a scheduled upload.</div>'
+    : '<div class="verdict bad"><b>Zero qualified leads.</b> ' + (!s ? 'Rows fail Google\'s upload rules before matching is even tried.' : 'The import runs, but the row has nothing Google can match to an ad click.') + '</div>';
+}
+['z-gclid','z-email','z-sheet'].forEach(function(id){ $(id).addEventListener('change', runZero); });
+
+/* ---------- weeks ---------- */
+$('w-b').value = POST.monthly_budget; $('w-al').value = POST.week_a.leads; $('w-ac').value = POST.week_a.cpl; $('w-bl').value = POST.week_b.leads; $('w-bc').value = POST.week_b.cpl;
+function runWeeks(){
+  var p = {monthly_budget: +$('w-b').value || 0, week_a: {leads: Math.round(+$('w-al').value || 0), cpl: +$('w-ac').value || 0}, week_b: {leads: Math.round(+$('w-bl').value || 0), cpl: +$('w-bc').value || 0}};
+  if (!(p.monthly_budget > 0 && p.week_a.leads > 0 && p.week_a.cpl > 0 && p.week_b.cpl > 0)) return;
+  var r = weeks(p);
+  $('w-stats').innerHTML = [['Average week of the budget (USD)', money(r.avg_week_spend), ''], ['Week A spend implied (USD)', money(r.week_a_spend) + ' · ' + r.week_a_vs_avg.toFixed(1) + 'x', r.week_a_vs_avg > 1.5 ? 'bad' : ''],
+    ['Week B spend implied (USD)', money(r.week_b_spend) + ' · ' + r.week_b_vs_avg.toFixed(1) + 'x', r.week_b_vs_avg > 1.5 ? 'bad' : '']]
+    .map(function(s){ return '<div class="stat ' + s[2] + '"><div class="k">' + s[0] + '</div><div class="v">' + s[1] + '</div></div>'; }).join('');
+  $('w-read').innerHTML = 'The two weeks do not fit one budget: either spend swung by ' + Math.round(-100 * r.spend_change) + '%, or the "leads" come from different columns or conversion actions. ' +
+    'And it is not noise: if ' + p.week_a.leads + ' a week were the true rate, seeing ' + p.week_b.leads + ' or fewer has a probability of <b>' + r.p_seven_or_fewer_if_rate_40.toExponential(1) + '</b>. ' +
+    'The same monthly budget buys ' + Math.round(r.leads_per_month_at_a) + ' leads at a cost per lead of ' + p.week_a.cpl + ' and ' + r.leads_per_month_at_b.toFixed(1) + ' at ' + p.week_b.cpl + ' (USD).';
+}
+['w-b','w-al','w-ac','w-bl','w-bc'].forEach(function(id){ $(id).addEventListener('input', runWeeks); });
+
+/* ---------- capture ---------- */
+function runCap(){
+  var ids = CAP.readClickIds($('c-url').value);
+  CAP.CONFIG.googleFormEntry.gclid = $('c-entry').value.trim();
+  $('c-ids').textContent = JSON.stringify(ids, null, 1);
+  $('c-cookie').textContent = Object.keys(ids).length ? CAP.cookieString(ids, Date.UTC(2026, 10, 10)) : '(no click ID in this URL: nothing stored, an earlier cookie is used)';
+  $('c-form').textContent = CAP.prefillGoogleFormSrc($('c-src').value.trim(), ids);
+}
+['c-url','c-entry','c-src'].forEach(function(id){ $(id).addEventListener('input', runCap); });
+
+/* ---------- import ---------- */
+function runImport(){
+  var today = Date.parse($('i-today').value + 'T17:00:00Z') || Date.now();
+  var rep = checkRows($('i-csv').value, [$('i-name').value.trim()].filter(Boolean), today);
+  $('i-badge').hidden = !($('i-csv').value === SAMPLES.broken || $('i-csv').value === SAMPLES.fixed);
+  $('i-stats').innerHTML = [['Rows', rep.rows, ''], ['Uploadable', rep.uploadable, rep.uploadable === rep.rows && rep.rows ? 'ok' : 'bad'], ['With a click ID', rep.with_click_id, rep.with_click_id ? 'ok' : 'bad'], ['Time zone row', rep.time_zone_row || 'missing', rep.time_zone_row ? 'ok' : 'bad']]
+    .map(function(s){ return '<div class="stat ' + s[2] + '"><div class="k">' + s[0] + '</div><div class="v">' + esc(s[1]) + '</div></div>'; }).join('');
+  $('i-rows').querySelector('tbody').innerHTML = rep.detail.map(function(r){
+    return '<tr><td class="n">' + r.row + '</td><td>' + (r.gclid ? 'yes' : 'no') + '</td><td>' + (r.user_data ? 'yes' : 'no') + '</td><td>' + (r.ok ? '<span class="pill ok">passes</span>' : '<ul class="probs">' + r.problems.map(function(p){ return '<li>' + esc(p) + '</li>'; }).join('') + '</ul>') + '</td></tr>';
+  }).join('');
+}
+$('i-run').addEventListener('click', runImport);
+$('i-broken').addEventListener('click', function(){ $('i-csv').value = SAMPLES.broken; runImport(); });
+$('i-fixed').addEventListener('click', function(){ $('i-csv').value = SAMPLES.fixed; runImport(); });
+
+/* ---------- plan ---------- */
+$('plan').querySelector('tbody').innerHTML = PLAN.rows.map(function(r){ return '<tr><td class="mono">' + r[0] + '</td><td>' + esc(r[1]) + '<div class="note">' + esc(r[3].replace(/`/g, '')) + '</div></td><td class="n">' + r[2] + '</td></tr>'; }).join('') +
+  '<tr><td></td><td><b>Total</b></td><td class="n"><b>' + PLAN.total + '</b></td></tr>';
+
+$('i-csv').value = SAMPLES.broken;
+runZero(); runWeeks(); runCap(); runImport(); show(location.hash.slice(1));
+</script>
+
+</body>
+</html>
